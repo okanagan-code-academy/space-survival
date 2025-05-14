@@ -86,11 +86,11 @@ namespace WeaponNode {
             return this.rightChildObject
         }
     }
-    //% block="projectile %spriteImage=screen_image_picker of kind %kind=spritekind with damage $damage, health $health, speed $speed, left child %leftChild=variables_get and right child %rightChild=variables_get"
+    //% block="projectile %spriteImage=screen_image_picker with damage $damage, health $health, speed $speed, child 1 %leftChild=ProjectileNode, child 2 %rightChild=ProjectileNode and kind %kind=spritekind"
     //% blockId=createProjectileNode
     //% target.shadow=variables_get
     //% weight=60
-    //% blockSetVariable = projectileNode
+    //% blockSetVariable = mySpriteNode
     //% group="Create"
     //% expandableArgumentMode=toggle
     export function createProjectileNode(spriteImage: Image, damage: number, health: number, speed: number, leftChild: ProjectileNode, rightChild: ProjectileNode, kind?: number): ProjectileNode {
