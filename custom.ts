@@ -85,40 +85,31 @@ namespace WeaponNode {
         getLeftChildObject() {
             return this.rightChildObject
         }
+        setLeftChildObject(child: ProjectileNode) {
+            this.leftChildObject = child
+        }
+        setRightChildObject(child: ProjectileNode) {
+            this.rightChildObject = child
+        }
+        createSprite() : Sprite {
+            let projectileSprite = sprites.create(this.spriteImage, this.spriteKind)
+            sprites.setDataNumber(projectileSprite, "health", this.health)
+            sprites.setDataNumber(projectileSprite, "damage", this.damage)
+            sprites.setDataNumber(projectileSprite, "speed", this.speed)
+            return projectileSprite
+        }
     }
-    //% block="projectile %spriteImage=screen_image_picker with damage $damage, health $health, speed $speed, child 1 %leftChild=ProjectileNode, child 2 %rightChild=ProjectileNode and kind %kind=spritekind"
-    //% blockId=createProjectileNode
+    //% block="sprite %SpriteImage=screen_image_picker, damage $damage, health $health, speed $speed, left child $leftChild, right child $rightChild of kind %kind=spritekind"
+    //% blockId=spritescreatenoset 
     //% target.shadow=variables_get
     //% weight=60
-    //% blockSetVariable = mySpriteNode
+    //% blockSetVariable = "mySpriteNode"
     //% group="Create"
-    //% expandableArgumentMode=toggle
     export function createProjectileNode(spriteImage: Image, damage: number, health: number, speed: number, leftChild: ProjectileNode, rightChild: ProjectileNode, kind?: number): ProjectileNode {
         let projectileNode: ProjectileNode = new ProjectileNode(spriteImage, kind, damage, health, speed, leftChild, rightChild)
         return projectileNode
     }
-    // /**
-    // * Create a new sprite from an image
-    // * @param img the image
-    // */
-    // //% group="Create"
-    // //% blockId=spritescreate block="sprite %img=screen_image_picker of kind %kind=spritekind"
-    // //% expandableArgumentMode=toggle
-    // //% blockSetVariable=mySprite
-    // //% weight=100 help=sprites/create
-    // export function create(img: Image, kind?: number): Sprite {
-    //     const scene = game.currentScene();
-    //     const sprite = new Sprite(img)
-    //     sprite.setKind(kind);
-    //     scene.physicsEngine.addSprite(sprite);
-
-    //     // run on created handlers
-    //     scene.createdHandlers
-    //         .filter(h => h.kind == kind)
-    //         .forEach(h => h.handler(sprite));
-
-    //     return sprite
-    // }
+    
 }
 //% weight=100 color=#8E2EC4 icon=""
 namespace Math {
