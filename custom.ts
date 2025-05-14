@@ -40,10 +40,86 @@ namespace SpriteKind {
     export const Explosion = SpriteKind.create()
 }
 namespace userconfig {
-    export const ARCADE_SCREEN_WIDTH = 320
-    export const ARCADE_SCREEN_HEIGHT = 240
+    export const ARCADE_SCREEN_WIDTH = 640
+    export const ARCADE_SCREEN_HEIGHT = 480
 }
 
+//% weight=0 color=#b8860b icon="\uf021" block="Weapon Node"
+//% advanced=true
+namespace WeaponNode {
+
+    class ProjectileNode {
+        spriteImage: Image
+        spriteKind: number
+        damage: number
+        health: number
+        speed: number
+        leftChildObject: ProjectileNode = null
+        rightChildObject: ProjectileNode = null
+
+
+        constructor(spriteImage: Image, spriteKind: number, damage: number, health: number, speed: number, leftChild: ProjectileNode, rightChild: ProjectileNode) {
+            this.spriteImage = spriteImage
+            this.spriteKind = spriteKind
+            this.damage = damage
+            this.health = health
+            this.speed = speed
+            this.leftChildObject = leftChild
+            this.rightChildObject = rightChild
+        }
+        getImage() {
+            return this.spriteImage
+        }
+        getKind() {
+            return this.spriteKind
+        }
+        getDamage() {
+            return this.damage
+        }
+        getHealth(){
+            return this.health
+        }
+        getRightChildObject(){
+            return this.rightChildObject
+        }
+        getLeftChildObject() {
+            return this.rightChildObject
+        }
+    }
+    //% block="projectile %spriteImage=screen_image_picker of kind %kind=spritekind with damage $damage, health $health, speed $speed, left child %leftChild=variables_get and right child %rightChild=variables_get"
+    //% blockId=createProjectileNode
+    //% target.shadow=variables_get
+    //% weight=60
+    //% blockSetVariable = projectileNode
+    //% group="Create"
+    //% expandableArgumentMode=toggle
+    export function createProjectileNode(spriteImage: Image, damage: number, health: number, speed: number, leftChild: ProjectileNode, rightChild: ProjectileNode, kind?: number): ProjectileNode {
+        let projectileNode: ProjectileNode = new ProjectileNode(spriteImage, kind, damage, health, speed, leftChild, rightChild)
+        return projectileNode
+    }
+    // /**
+    // * Create a new sprite from an image
+    // * @param img the image
+    // */
+    // //% group="Create"
+    // //% blockId=spritescreate block="sprite %img=screen_image_picker of kind %kind=spritekind"
+    // //% expandableArgumentMode=toggle
+    // //% blockSetVariable=mySprite
+    // //% weight=100 help=sprites/create
+    // export function create(img: Image, kind?: number): Sprite {
+    //     const scene = game.currentScene();
+    //     const sprite = new Sprite(img)
+    //     sprite.setKind(kind);
+    //     scene.physicsEngine.addSprite(sprite);
+
+    //     // run on created handlers
+    //     scene.createdHandlers
+    //         .filter(h => h.kind == kind)
+    //         .forEach(h => h.handler(sprite));
+
+    //     return sprite
+    // }
+}
 //% weight=100 color=#8E2EC4 icon=""
 namespace Math {
     /**
@@ -54,6 +130,18 @@ namespace Math {
     //% block
     export function lerp(value0: number, value1: number, t: number): number {
         return value0 + t * (value1 - value0);
+    }
+    /**
+    * Linear interpolation between two values, in particular with angles
+    * as angles are restricted between the interval [-Math.PI, Math.PI]
+    * @param value0 is a real number, eg: 25.44
+    * @param value1 is a different real number, eg: 52.14
+    */
+    //% block
+    export function lerpAngle(value0: number, value1: number, t: number): number {
+        let horizontalComponent = (1 - t) * Math.cos(value0) + t * Math.cos(value1);
+        let verticalComponent = (1 - t) * Math.sin(value0) + t * Math.sin(value1);
+        return Math.atan2(verticalComponent, horizontalComponent);
     }
 }
 //% weight=100 color=#8E2EC4 icon=""
