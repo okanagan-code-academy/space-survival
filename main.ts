@@ -1,19 +1,10 @@
 namespace SpriteKind {
     export const Cursor = SpriteKind.create()
+    export const Upgrade = SpriteKind.create()
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
-    if (weaponType == 0) {
-        projectileSprite = sprites.create(assets.image`projectile`, SpriteKind.Projectile)
-        spriteutils.placeAngleFrom(
-        projectileSprite,
-        spriteutils.degreesToRadians(transformSprites.getRotation(playerShip)),
-        15,
-        playerShip
-        )
-        spriteutils.setVelocityAtAngle(projectileSprite, spriteutils.degreesToRadians(transformSprites.getRotation(playerShip)), 200)
-        projectileSprite.setFlag(SpriteFlag.AutoDestroy, true)
-    }
-    pause(1000)
+    let currentScene: scene.Scene = game.currentScene()
+pauseScene(currentScene)
 })
 function spawnAsteroids () {
     asteroidSprite = sprites.create(img`
@@ -48,69 +39,118 @@ function spawnAsteroids () {
             asteroidPosition = spriteutils.pos(randint(0, scene.screenWidth()), scene.screenHeight())
         }
     }
-    asteroidSprite.setPosition(0, 0)
+    asteroidSprite.setPosition(asteroidPosition.x, asteroidPosition.y)
     spriteutils.setVelocityAtAngle(asteroidSprite, spriteutils.angleFrom(asteroidSprite, playerShip), 50)
     asteroidSprite.setFlag(SpriteFlag.AutoDestroy, true)
 }
 browserEvents.onMouseMove(function (x, y) {
     cursorSprite.setPosition(x, y)
 })
+function onStart () {
+    playerShip = sprites.create(assets.image`ship`, SpriteKind.Player)
+    controller.moveSprite(playerShip)
+    cursorSprite = sprites.create(img`
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . 2 2 2 2 2 . . . . . 
+        . . . . . . 2 2 2 2 2 . . . . . 
+        . . . . . . 2 2 2 2 2 . . . . . 
+        . . . . . . 2 2 2 2 2 . . . . . 
+        . . . . . . 2 2 2 2 2 . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        . . . . . . . . . . . . . . . . 
+        `, SpriteKind.Cursor)
+}
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
     sprites.destroy(sprite)
     sprites.destroy(otherSprite)
+    info.changeScoreBy(15)
 })
-let rotationOffset = 0
+
+let cursorSprite: Sprite = null
 let asteroidPosition: spriteutils.Position = null
 let asteroidSprite: Sprite = null
-let projectileSprite: Sprite = null
-let cursorSprite: Sprite = null
 let playerShip: Sprite = null
-let weaponType = 0
-let distanceToCursor = 0
-weaponType = 1
-playerShip = sprites.create(assets.image`ship`, SpriteKind.Player)
-controller.moveSprite(playerShip)
-cursorSprite = sprites.create(img`
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . 2 2 2 2 2 . . . . . 
-    . . . . . . 2 2 2 2 2 . . . . . 
-    . . . . . . 2 2 2 2 2 . . . . . 
-    . . . . . . 2 2 2 2 2 . . . . . 
-    . . . . . . 2 2 2 2 2 . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    . . . . . . . . . . . . . . . . 
-    `, SpriteKind.Cursor)
+let rotationOffset = 0
+class Base extends ProjectileNode {
+    shootProjectile() {
+        let projectileSprite = super.createSprite()
+        spriteutils.placeAngleFrom(
+            projectileSprite,
+            spriteutils.degreesToRadians(transformSprites.getRotation(playerShip)),
+            15,
+            playerShip
+        )
+        spriteutils.setVelocityAtAngle(projectileSprite, spriteutils.degreesToRadians(transformSprites.getRotation(playerShip)), this.speed)
+        pause(this.delay)
+    }
+}
+class MinorShotgun extends ProjectileNode {
+    shootProjectile() {
+        let rotationOffsetAngle = -Math.PI / 8
+        for (let i = 0; i <= 2; i++) {
+            let projectileSprite2 = super.createSprite()
+            spriteutils.placeAngleFrom(
+                projectileSprite2,
+                spriteutils.degreesToRadians(transformSprites.getRotation(playerShip)) + rotationOffsetAngle,
+                15,
+                playerShip
+            )
+            spriteutils.setVelocityAtAngle(projectileSprite2, spriteutils.degreesToRadians(transformSprites.getRotation(playerShip)) + rotationOffsetAngle, this.speed)
+            rotationOffsetAngle += (Math.PI / 8)
+        }
+        pause(this.delay)
+    }
+}
+class MinorMachineGun extends ProjectileNode{
+    shootProjectile() {
+        let projectileSprite3 = super.createSprite()
+        spriteutils.placeAngleFrom(
+            projectileSprite3,
+            spriteutils.degreesToRadians(transformSprites.getRotation(playerShip)),
+            15,
+            playerShip
+        )
+        spriteutils.setVelocityAtAngle(projectileSprite3, spriteutils.degreesToRadians(transformSprites.getRotation(playerShip)), this.speed)
+        pause(this.delay)
+    }
+}
+let baseNode = new Base(assets.image`projectile`, SpriteKind.Projectile, 1000000, 5000, 200, null, null)
+let minorShotgunNode = new MinorShotgun(assets.image`projectile`, SpriteKind.Projectile, 1000000, 350, 200, null, null)
+let currentProjectileNode = minorShotgunNode
+onStart()
+function pauseScene(scene :scene.Scene){
+    // game.addScenePopHandler()
+    // game.popScene()
+    // controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
+    //     game.
+    // })
+
+}
 forever(function () {
     transformSprites.rotateSprite(playerShip, spriteutils.radiansToDegrees(Math.lerpAngle(spriteutils.degreesToRadians(transformSprites.getRotation(playerShip)), spriteutils.angleFrom(cursorSprite, playerShip) + 3.14159, 1 - 2 ** (-0.05 * game.getDeltaTime()))))
 })
 forever(function () {
     if (browserEvents.MouseLeft.isPressed()) {
-        if (weaponType == 1) {
-            rotationOffset = -15
-            for (let index = 0; index <= 2; index++) {
-                projectileSprite = sprites.create(assets.image`projectile`, SpriteKind.Projectile)
-                spriteutils.placeAngleFrom(
-                projectileSprite,
-                spriteutils.degreesToRadians(transformSprites.getRotation(playerShip)),
-                15,
-                playerShip
-                )
-                spriteutils.setVelocityAtAngle(projectileSprite, spriteutils.degreesToRadians(transformSprites.getRotation(playerShip) + rotationOffset), 200)
-                projectileSprite.setFlag(SpriteFlag.AutoDestroy, true)
-                rotationOffset += 15
-            }
-            pause(500)
-        }
+        currentProjectileNode.shootProjectile()
     }
 })
 game.onUpdateInterval(500, function () {
     spawnAsteroids()
+})
+info.onScore(30, function(){
+    let upgradeSprite = sprites.create(assets.image`upgradeCard`, SpriteKind.Upgrade)
+    let titleTextSprite = textsprite.create("Weapon1", 0, 1)
+    titleTextSprite.setScale(5)
+    titleTextSprite.setPosition(upgradeSprite.x, upgradeSprite.y)
+    let descriptionTextSprite = textsprite.create("Description here", 0, 1)
+    descriptionTextSprite.setPosition(titleTextSprite.x, titleTextSprite.y - 50)
+
 })

@@ -5,7 +5,6 @@
 */
 
 
-
 namespace SpriteSheet {
     export let shipImage: Image =assets.image`ship`
     export let projectileImage: Image =assets.image`projectile`
@@ -25,6 +24,7 @@ namespace SpriteSheet {
     ]
     export const blankImage: Image = assets.image`blank`
 }
+
 // namespace VFXSprites {
 //     const frameInterval: number = 50
 //     export function createExplosion(animations: Image[], position: Vector2, scale: number): void {
@@ -35,6 +35,7 @@ namespace SpriteSheet {
 //         animation.runImageAnimation(explosionSprite, animations, frameInterval, false)
 //     }
 // }
+
 namespace SpriteKind {
     export const Asteroid = SpriteKind.create()
     export const Explosion = SpriteKind.create()
@@ -44,73 +45,71 @@ namespace userconfig {
     export const ARCADE_SCREEN_HEIGHT = 480
 }
 
-//% weight=0 color=#b8860b icon="\uf021" block="Weapon Node"
-//% advanced=true
-namespace WeaponNode {
-
-    class ProjectileNode {
-        spriteImage: Image
-        spriteKind: number
-        damage: number
-        health: number
-        speed: number
-        leftChildObject: ProjectileNode = null
-        rightChildObject: ProjectileNode = null
-
-
-        constructor(spriteImage: Image, spriteKind: number, damage: number, health: number, speed: number, leftChild: ProjectileNode, rightChild: ProjectileNode) {
-            this.spriteImage = spriteImage
-            this.spriteKind = spriteKind
-            this.damage = damage
-            this.health = health
-            this.speed = speed
-            this.leftChildObject = leftChild
-            this.rightChildObject = rightChild
-        }
-        getImage() {
-            return this.spriteImage
-        }
-        getKind() {
-            return this.spriteKind
-        }
-        getDamage() {
-            return this.damage
-        }
-        getHealth(){
-            return this.health
-        }
-        getRightChildObject(){
-            return this.rightChildObject
-        }
-        getLeftChildObject() {
-            return this.rightChildObject
-        }
-        setLeftChildObject(child: ProjectileNode) {
-            this.leftChildObject = child
-        }
-        setRightChildObject(child: ProjectileNode) {
-            this.rightChildObject = child
-        }
-        createSprite() : Sprite {
-            let projectileSprite = sprites.create(this.spriteImage, this.spriteKind)
-            sprites.setDataNumber(projectileSprite, "health", this.health)
-            sprites.setDataNumber(projectileSprite, "damage", this.damage)
-            sprites.setDataNumber(projectileSprite, "speed", this.speed)
-            return projectileSprite
-        }
-    }
-    //% block="sprite %SpriteImage=screen_image_picker, damage $damage, health $health, speed $speed, left child $leftChild, right child $rightChild of kind %kind=spritekind"
-    //% blockId=spritescreatenoset 
-    //% target.shadow=variables_get
-    //% weight=60
-    //% blockSetVariable = "mySpriteNode"
-    //% group="Create"
-    export function createProjectileNode(spriteImage: Image, damage: number, health: number, speed: number, leftChild: ProjectileNode, rightChild: ProjectileNode, kind?: number): ProjectileNode {
-        let projectileNode: ProjectileNode = new ProjectileNode(spriteImage, kind, damage, health, speed, leftChild, rightChild)
-        return projectileNode
-    }
+enum upgradeType {
     
+
 }
+class ProjectileNode {
+    
+    spriteImage: Image
+    spriteKind: number
+    damage: number
+    delay: number
+    speed: number
+    leftChildObject: ProjectileNode = null
+    rightChildObject: ProjectileNode = null
+
+
+    constructor(spriteImage: Image, spriteKind: number, damage: number, delay: number, speed: number, leftChild: ProjectileNode, rightChild: ProjectileNode) {
+        this.spriteImage = spriteImage
+        this.spriteKind = spriteKind
+        this.damage = damage
+        this.delay = delay
+        this.speed = speed
+        this.leftChildObject = leftChild
+        this.rightChildObject = rightChild
+    }
+    getImage() {
+        return this.spriteImage
+    }
+    getKind() {
+        return this.spriteKind
+    }
+    getDamage() {
+        return this.damage
+    }
+    getdelay(){
+        return this.delay
+    }
+    getSpeed(){
+        return this.speed
+    }
+    getRightChildObject(){
+        return this.rightChildObject
+    }
+    getLeftChildObject() {
+        return this.rightChildObject
+    }
+    setLeftChildObject(child: ProjectileNode) {
+        this.leftChildObject = child
+    }
+    setRightChildObject(child: ProjectileNode) {
+        this.rightChildObject = child
+    }
+    createSprite() : Sprite {
+        let projectileSprite = sprites.create(this.spriteImage, this.spriteKind)
+        sprites.setDataNumber(projectileSprite, "delay", this.delay)
+        sprites.setDataNumber(projectileSprite, "damage", this.damage)
+        sprites.setDataNumber(projectileSprite, "speed", this.speed)
+        projectileSprite.setPosition(playerShip.x, playerShip.y)
+        return projectileSprite
+    }
+    shootProjectile() : void {
+        
+    }
+
+}
+   
 //% weight=100 color=#8E2EC4 icon=""
 namespace Math {
     /**
@@ -135,6 +134,7 @@ namespace Math {
         return Math.atan2(verticalComponent, horizontalComponent);
     }
 }
+
 //% weight=100 color=#8E2EC4 icon=""
 namespace game {
     /**
