@@ -50,7 +50,7 @@ enum upgradeType {
 
 }
 class ProjectileNode {
-    
+    name: string
     spriteImage: Image
     spriteKind: number
     damage: number
@@ -60,7 +60,8 @@ class ProjectileNode {
     rightChildObject: ProjectileNode = null
 
 
-    constructor(spriteImage: Image, spriteKind: number, damage: number, delay: number, speed: number, leftChild: ProjectileNode, rightChild: ProjectileNode) {
+    constructor(name: string, spriteImage: Image, spriteKind: number, damage: number, delay: number, speed: number, leftChild: ProjectileNode, rightChild: ProjectileNode) {
+        this.name = name
         this.spriteImage = spriteImage
         this.spriteKind = spriteKind
         this.damage = damage
@@ -88,7 +89,7 @@ class ProjectileNode {
         return this.rightChildObject
     }
     getLeftChildObject() {
-        return this.rightChildObject
+        return this.leftChildObject
     }
     setLeftChildObject(child: ProjectileNode) {
         this.leftChildObject = child

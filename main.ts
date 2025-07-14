@@ -4,7 +4,7 @@ namespace SpriteKind {
 }
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     let currentScene: scene.Scene = game.currentScene()
-pauseScene(currentScene)
+    pauseScene(currentScene)
 })
 function spawnAsteroids () {
     asteroidSprite = sprites.create(img`
@@ -25,6 +25,7 @@ function spawnAsteroids () {
         . . . . c c a b b c c c . . . . 
         . . . . . c c c c c c . . . . . 
         `, SpriteKind.Enemy)
+    asteroidSprite.setFlag(SpriteFlag.AutoDestroy, true)
     asteroidPosition = spriteutils.pos(0, 0)
     if (Math.percentChance(50)) {
         if (Math.percentChance(50)) {
@@ -79,6 +80,7 @@ let asteroidPosition: spriteutils.Position = null
 let asteroidSprite: Sprite = null
 let playerShip: Sprite = null
 let rotationOffset = 0
+let upgradeRound = false
 class Base extends ProjectileNode {
     shootProjectile() {
         let projectileSprite = super.createSprite()
@@ -96,14 +98,14 @@ class MinorShotgun extends ProjectileNode {
     shootProjectile() {
         let rotationOffsetAngle = -Math.PI / 8
         for (let i = 0; i <= 2; i++) {
-            let projectileSprite2 = super.createSprite()
+            let projectileSprite = super.createSprite()
             spriteutils.placeAngleFrom(
-                projectileSprite2,
+                projectileSprite,
                 spriteutils.degreesToRadians(transformSprites.getRotation(playerShip)) + rotationOffsetAngle,
                 15,
                 playerShip
             )
-            spriteutils.setVelocityAtAngle(projectileSprite2, spriteutils.degreesToRadians(transformSprites.getRotation(playerShip)) + rotationOffsetAngle, this.speed)
+            spriteutils.setVelocityAtAngle(projectileSprite, spriteutils.degreesToRadians(transformSprites.getRotation(playerShip)) + rotationOffsetAngle, this.speed)
             rotationOffsetAngle += (Math.PI / 8)
         }
         pause(this.delay)
@@ -111,22 +113,26 @@ class MinorShotgun extends ProjectileNode {
 }
 class MinorMachineGun extends ProjectileNode{
     shootProjectile() {
-        let projectileSprite3 = super.createSprite()
+        let projectileSprite = super.createSprite()
         spriteutils.placeAngleFrom(
-            projectileSprite3,
+            projectileSprite,
             spriteutils.degreesToRadians(transformSprites.getRotation(playerShip)),
             15,
             playerShip
         )
-        spriteutils.setVelocityAtAngle(projectileSprite3, spriteutils.degreesToRadians(transformSprites.getRotation(playerShip)), this.speed)
+        spriteutils.setVelocityAtAngle(projectileSprite, spriteutils.degreesToRadians(transformSprites.getRotation(playerShip)), this.speed)
         pause(this.delay)
     }
 }
-let baseNode = new Base(assets.image`projectile`, SpriteKind.Projectile, 1000000, 5000, 200, null, null)
-let minorShotgunNode = new MinorShotgun(assets.image`projectile`, SpriteKind.Projectile, 1000000, 350, 200, null, null)
-let currentProjectileNode = minorShotgunNode
+let baseNode = new Base("Base", assets.image`projectile`, SpriteKind.Projectile, 1000000, 400, 200, null, null)
+let minorShotgunNode = new MinorShotgun("Minor Shotgun", assets.image`projectile`, SpriteKind.Projectile, 1000000, 200, 200, null, null)
+let minorMachineGun = new MinorMachineGun("Minor Machine", assets.image`projectile`, SpriteKind.Projectile, 1000, 500, 75, null, null)
+baseNode.setLeftChildObject(minorShotgunNode)
+baseNode.setRightChildObject(minorMachineGun)
+let currentProjectileNode: ProjectileNode = baseNode
+
 onStart()
-function pauseScene(scene :scene.Scene){
+function pauseScene(scene: scene.Scene){
     // game.addScenePopHandler()
     // game.popScene()
     // controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
@@ -143,14 +149,59 @@ forever(function () {
     }
 })
 game.onUpdateInterval(500, function () {
+    if(upgradeRound){
+        return
+    }
     spawnAsteroids()
 })
 info.onScore(30, function(){
-    let upgradeSprite = sprites.create(assets.image`upgradeCard`, SpriteKind.Upgrade)
-    let titleTextSprite = textsprite.create("Weapon1", 0, 1)
-    titleTextSprite.setScale(5)
-    titleTextSprite.setPosition(upgradeSprite.x, upgradeSprite.y)
-    let descriptionTextSprite = textsprite.create("Description here", 0, 1)
-    descriptionTextSprite.setPosition(titleTextSprite.x, titleTextSprite.y - 50)
+    upgradeRound = true
+    const offsetX: number = 50
+    sprites.destroyAllSpritesOfKind(SpriteKind.Enemy)
+    createUpgradeCards(screen.width / 3 - offsetX, screen.height / 2, currentProjectileNode.getLeftChildObject(), "left")
+    createUpgradeCards(2*screen.width / 3 + offsetX, screen.height / 2, currentProjectileNode.getRightChildObject(), "right")
+    
+})
+function createUpgradeCards(positionX: number, positionY: number, childNode: ProjectileNode, childType: string ) {
+    if(!childNode){
+        return
+    }
+    let upgradeCardSprite = sprites.create(assets.image`upgradeCard`, SpriteKind.Upgrade)
+    sprites.setDataString(upgradeCardSprite, "childType", childType)
+    upgradeCardSprite.setScale(3, ScaleAnchor.Middle)
+    upgradeCardSprite.setPosition(positionX, positionY)
+    let titleTextSprite = textsprite.create(childNode.name, 0, 15)
+    titleTextSprite.setScale(2.5, ScaleAnchor.Middle)
+    titleTextSprite.setPosition(upgradeCardSprite.x, upgradeCardSprite.y - upgradeCardSprite.height / 2 + 25)
+    let damageLabelSprite = textsprite.create("Damage: " + childNode.damage, 0, 15)
+    damageLabelSprite.setPosition(titleTextSprite.x, titleTextSprite.y + 50)
+    damageLabelSprite.setScale(2, ScaleAnchor.Middle)
 
+}
+sprites.onOverlap(SpriteKind.Cursor, SpriteKind.Upgrade, function(sprite: Sprite, otherSprite: Sprite){
+    otherSprite.setImage(assets.image`selectedUpgradeCard`)
+    if(browserEvents.MouseLeft.isPressed()){
+        sprites.destroyAllSpritesOfKind(SpriteKind.Upgrade)
+        sprites.destroyAllSpritesOfKind(SpriteKind.Text)
+        pause(100)
+        let childType: string = sprites.readDataString(otherSprite, "childType")
+        if(!childType){
+            return
+        }
+        if(childType == "left"){
+            currentProjectileNode = currentProjectileNode.getLeftChildObject()
+        } else {
+            currentProjectileNode = currentProjectileNode.getRightChildObject()
+        }
+        
+        upgradeRound = false
+    }
+})
+
+forever(function(){
+    for(let card of sprites.allOfKind(SpriteKind.Upgrade)){
+        if(!card.overlapsWith(cursorSprite)){
+            card.setImage(assets.image`upgradeCard`)
+        }
+    }
 })
