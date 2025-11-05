@@ -37,7 +37,6 @@ namespace SpriteSheet {
 // }
 
 namespace SpriteKind {
-    export const Asteroid = SpriteKind.create()
     export const Explosion = SpriteKind.create()
 }
 namespace userconfig {
@@ -45,10 +44,6 @@ namespace userconfig {
     export const ARCADE_SCREEN_HEIGHT = 480
 }
 
-enum upgradeType {
-    
-
-}
 class ProjectileNode {
     name: string
     spriteImage: Image
